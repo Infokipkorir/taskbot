@@ -745,31 +745,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-hei
         <div id="tm-steps-list" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
 
-      <!-- PROOF SECTION - injected by acceptTask() -->
-      <div id="tm-body"></div>
-
-    </div>
-
-    <!-- FOOTER -->
-    <div style="padding:12px 18px;border-top:1px solid var(--b);flex-shrink:0">
-      <!-- validation error -->
-      <div id="tm-val-err" style="display:none;background:#FEE2E2;border:1px solid #FCA5A5;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:12px;font-weight:600;color:#991B1B"></div>
-      <!-- progress bar for upload -->
-      <div id="tm-upload-prog" style="display:none;margin-bottom:10px">
-        <div style="font-size:11px;color:var(--blue);font-weight:600;margin-bottom:4px" id="tm-upload-label">Uploading...</div>
-        <div style="height:4px;background:var(--b);border-radius:4px;overflow:hidden"><div id="tm-upload-bar" style="height:100%;background:var(--blue);width:0%;transition:width .3s"></div></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="mcan" onclick="cancelTaskFromModal()" style="flex:1">Cancel Task</button>
-        <button class="msub" id="tm-submit" onclick="submitTask()" style="flex:2">Submit Proof</button>
-      </div>
-      <div style="text-align:center;margin-top:8px">
-        <button onclick="reportTaskProblem()" style="background:none;border:none;font-size:10px;color:var(--mu);cursor:pointer;text-decoration:underline">Report a problem</button>
-      </div>
-    </div>
-
-  </div>
-</div>
+    
       <!-- timer row inside header -->
       <div class="dtimer" id="tm-dual" style="display:none;margin-top:12px;background:rgba(0,0,0,.18);border-radius:10px;padding:8px 14px">
         <div class="dtc"><div class="dtl" style="color:rgba(255,255,255,.65)">Remaining</div><div class="dtv rem" id="tm-rem" style="color:#fff">2:00:00</div></div>
