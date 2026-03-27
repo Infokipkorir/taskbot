@@ -234,7 +234,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-hei
 .faq-a.open{max-height:300px;padding:0 14px 12px}
 
 /* ── NOTIFICATIONS ── */
-.notif-item{background:var(--card);border:0.5px solid var(--b);border-left:3px solid var(--blue);border-radius:var(--r);padding:11px 13px;margin-bottom:7px;cursor:pointer}
+.notif-item{background:var(--card);border:0.5px solid var(--b);border-left:3px solid var(--blue);border-radius:var(--r);padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:opacity .2s}
 .notif-item.read{opacity:.65;border-left-color:var(--hi)}
 .notif-title{font-size:12px;font-weight:700;color:var(--tx)}
 .notif-msg{font-size:11px;color:var(--mu);margin-top:3px;line-height:1.4}
@@ -244,6 +244,24 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-hei
 .nt-warning{border-left-color:var(--or)!important}
 .nt-urgent{border-left-color:var(--red)!important}
 
+/* Unread badge */
+.notif-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:0 5px;margin-left:6px;vertical-align:middle}
+
+/* Sender row */
+.notif-sender{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.notif-sender-name{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px}
+.notif-verified{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;background:#F5A623;border-radius:50%;flex-shrink:0}
+.notif-verified svg{width:8px;height:8px;fill:#fff}
+
+/* Unread dot */
+.notif-unread-dot{width:8px;height:8px;background:var(--blue);border-radius:50%;flex-shrink:0;margin-left:auto}
+
+/* Actions row */
+.notif-actions{display:flex;gap:14px;margin-top:8px;padding-top:7px;border-top:0.5px solid var(--b)}
+.notif-action-btn{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--mu);background:none;border:none;cursor:pointer;padding:0;transition:color .15s}
+.notif-action-btn:hover{color:var(--tx)}
+.notif-action-btn.liked{color:var(--red)}
+.notif-action-btn svg{width:12px;height:12px}
 /* ── POLICY PAGES ── */
 .policy-wrap{background:var(--card);border:0.5px solid var(--b);border-radius:var(--rl2);padding:16px}
 .policy-title{font-size:16px;font-weight:800;color:var(--tx);margin-bottom:4px}
@@ -756,13 +774,28 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-hei
 
 <!-- NOTIFICATIONS PAGE -->
 <div class="pg" id="pg-notifs">
-  <div style="display:flex;align-items:center;justify-content:space-between">
-    <div class="sec">Notifications</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="display:flex;align-items:center">
+      <div class="sec" style="margin:0">Notifications</div>
+      <span class="notif-badge" id="notif-unread-badge" style="display:none">0</span>
+    </div>
     <button onclick="markAllRead()" style="font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;font-weight:600">Mark all read</button>
   </div>
   <div id="notifs-list"><div class="ldr">Loading...</div></div>
 </div>
 
+<!-- Notif action sheet -->
+<div class="mwrap" id="notif-report-modal">
+  <div class="modal">
+    <div class="mt">Report notification</div>
+    <div class="ms" style="margin-bottom:14px">Why are you reporting this?</div>
+    <button onclick="submitNotifReport('spam')"    class="mbtn" style="margin-bottom:8px;width:100%">Spam</button>
+    <button onclick="submitNotifReport('mislead')" class="mbtn" style="margin-bottom:8px;width:100%">Misleading</button>
+    <button onclick="submitNotifReport('other')"   class="mbtn" style="margin-bottom:16px;width:100%">Other</button>
+    <button onclick="closeModal('notif-report-modal')" style="width:100%;padding:10px;border:1.5px solid var(--b);border-radius:10px;font-size:12px;font-weight:700;color:var(--mu);background:var(--bg2);cursor:pointer">Cancel</button>
+  </div>
+</div>
+  
 <!-- PROFILE PAGE -->
 <div class="pg" id="pg-profile">
   <div class="prof-hd">
@@ -1134,6 +1167,149 @@ var sb=(function(){
     }
   };
 })();
+  /* ── NOTIFICATIONS JS ── */
+
+var _notifReportId = null;
+
+// Sender config – add more as needed
+var NOTIF_SENDERS = {
+  support:  { label: 'Support',  verified: true  },
+  payments: { label: 'Payments', verified: false },
+  system:   { label: 'System',   verified: false },
+};
+
+function renderNotifSender(type) {
+  var cfg = NOTIF_SENDERS[type] || { label: type || 'System', verified: false };
+  var badge = cfg.verified
+    ? '<span class="notif-verified"><svg viewBox="0 0 10 10"><polyline points="2,5 4.5,7.5 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+    : '';
+  return '<div class="notif-sender"><span class="notif-sender-name">' + cfg.label + '</span>' + badge + '</div>';
+}
+
+function renderNotifications(list) {
+  var el = document.getElementById('notifs-list');
+  if (!list || !list.length) {
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--mu);font-size:13px">No notifications yet</div>';
+    updateNotifBadge(0);
+    return;
+  }
+
+  var unread = 0;
+  var html = '';
+
+  list.forEach(function(n) {
+    if (!n.read) unread++;
+    var cls = 'notif-item ' + (n.read ? 'read ' : '') + (n.type ? 'nt-' + n.type : '');
+    var dot  = !n.read ? '<span class="notif-unread-dot"></span>' : '';
+    var liked = (n.liked) ? 'liked' : '';
+    var likeCount = n.likes || 0;
+
+    html += '<div class="' + cls + '" id="notif-' + n.id + '" onclick="markNotifRead(\'' + n.id + '\')">'
+          +   '<div style="display:flex;align-items:flex-start;gap:6px">'
+          +     '<div style="flex:1">'
+          +       renderNotifSender(n.sender)
+          +       '<div class="notif-title">' + (n.title || '') + '</div>'
+          +       '<div class="notif-msg">'   + (n.msg   || '') + '</div>'
+          +       '<div class="notif-date">'  + (n.date  || '') + '</div>'
+          +     '</div>'
+          +     dot
+          +   '</div>'
+          +   '<div class="notif-actions" onclick="event.stopPropagation()">'
+          +     '<button class="notif-action-btn ' + liked + '" id="like-btn-' + n.id + '" onclick="toggleNotifLike(\'' + n.id + '\')">'
+          +       '<svg viewBox="0 0 24 24" fill="' + (n.liked ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>'
+          +       '<span id="like-count-' + n.id + '">' + (likeCount > 0 ? likeCount : '') + '</span>'
+          +     '</button>'
+          +     '<button class="notif-action-btn" onclick="shareNotif(\'' + n.id + '\')">'
+          +       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>'
+          +       'Share'
+          +     '</button>'
+          +     '<button class="notif-action-btn" onclick="openNotifReport(\'' + n.id + '\')">'
+          +       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+          +       'Report'
+          +     '</button>'
+          +   '</div>'
+          + '</div>';
+  });
+
+  el.innerHTML = html;
+  updateNotifBadge(unread);
+}
+
+function updateNotifBadge(count) {
+  var badge = document.getElementById('notif-unread-badge');
+  if (!badge) return;
+  if (count > 0) {
+    badge.style.display = 'inline-flex';
+    badge.textContent = count > 99 ? '99+' : count;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function markNotifRead(id) {
+  var el = document.getElementById('notif-' + id);
+  if (!el || el.classList.contains('read')) return;
+  el.classList.add('read');
+  var dot = el.querySelector('.notif-unread-dot');
+  if (dot) dot.remove();
+  // Decrement badge
+  var badge = document.getElementById('notif-unread-badge');
+  if (badge) {
+    var cur = parseInt(badge.textContent) || 0;
+    updateNotifBadge(Math.max(0, cur - 1));
+  }
+  // Persist to backend if needed
+  // sb.from('notifications').update({read:true}).eq('id',id).exec();
+}
+
+function markAllRead() {
+  document.querySelectorAll('.notif-item:not(.read)').forEach(function(el) {
+    el.classList.add('read');
+    var dot = el.querySelector('.notif-unread-dot');
+    if (dot) dot.remove();
+  });
+  updateNotifBadge(0);
+}
+
+function toggleNotifLike(id) {
+  var btn   = document.getElementById('like-btn-' + id);
+  var count = document.getElementById('like-count-' + id);
+  if (!btn) return;
+  var liked = btn.classList.toggle('liked');
+  var svg   = btn.querySelector('svg');
+  if (svg) svg.setAttribute('fill', liked ? 'currentColor' : 'none');
+  var cur = parseInt(count.textContent) || 0;
+  var next = liked ? cur + 1 : Math.max(0, cur - 1);
+  count.textContent = next > 0 ? next : '';
+}
+
+function shareNotif(id) {
+  var title = '';
+  var el = document.getElementById('notif-' + id);
+  if (el) {
+    var t = el.querySelector('.notif-title');
+    var m = el.querySelector('.notif-msg');
+    title = (t ? t.textContent : '') + ' — ' + (m ? m.textContent : '');
+  }
+  if (navigator.share) {
+    navigator.share({ title: 'OneWall', text: title, url: window.location.href }).catch(function(){});
+  } else {
+    navigator.clipboard && navigator.clipboard.writeText(title);
+    showToast && showToast('Copied to clipboard');
+  }
+}
+
+function openNotifReport(id) {
+  _notifReportId = id;
+  document.getElementById('notif-report-modal').classList.add('open');
+}
+
+function submitNotifReport(reason) {
+  console.log('Reported notif', _notifReportId, 'for:', reason);
+  closeModal('notif-report-modal');
+  showToast && showToast('Thanks for your report');
+  _notifReportId = null;
+}
 
 /* ── STATE ── */
 var CU=null;
