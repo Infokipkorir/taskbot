@@ -1079,61 +1079,94 @@ body {
 </div>
   
 <!-- PROFILE PAGE -->
+<!-- PROFILE PAGE -->
 <div class="pg" id="pg-profile">
+
+  <!-- PROFILE HEADER -->
   <div class="prof-hd">
     <div class="prof-av" id="prof-av">TU</div>
     <div class="prof-name" id="prof-name">User</div>
     <div class="prof-email" id="prof-email"></div>
     <div class="prof-lvl" id="prof-lvl">Level 1</div>
   </div>
+
+  <!-- ACCOUNT STATUS -->
   <div class="sgrp">
     <div class="sgrp-head">Account status</div>
-    <div class="srow"><div><div class="srow-lbl">Email verification</div><div class="srow-sub" id="verify-sub">Verify your email</div></div><button id="verify-btn" onclick="doVerifyEmail()" style="padding:4px 10px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">Verify</button></div>
-    <div class="srow"><div><div class="srow-lbl">Member since</div></div><span style="font-size:12px;color:var(--mu)" id="prof-joined"></span></div>
-    <div class="srow"><div><div class="srow-lbl">Total earned</div></div><span style="font-size:13px;font-weight:800;color:var(--green)" id="prof-earned">$0.00</span></div>
-    <div class="srow"><div><div class="srow-lbl">Tasks completed</div></div><span style="font-size:13px;font-weight:800" id="prof-tasks">0</span></div>
+
+    <div class="srow">
+      <div>
+        <div class="srow-lbl">Email verification</div>
+        <div class="srow-sub" id="verify-sub">Verify your email</div>
+      </div>
+      <button id="verify-btn"
+        onclick="doVerifyEmail()"
+        style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">
+        Verify
+      </button>
+    </div>
+
+    <div class="srow">
+      <div class="srow-lbl">Member since</div>
+      <span id="prof-joined" style="font-size:12px;color:var(--mu)"></span>
+    </div>
+
+    <div class="srow">
+      <div class="srow-lbl">Total earned</div>
+      <span id="prof-earned" style="font-size:14px;font-weight:800;color:var(--green)">$0.00</span>
+    </div>
+
+    <div class="srow">
+      <div class="srow-lbl">Tasks completed</div>
+      <span id="prof-tasks" style="font-size:14px;font-weight:800">0</span>
+    </div>
   </div>
+
+  <!-- PAYMENT METHOD (ONLY PAYPAL) -->
   <div class="sgrp">
-    <div class="sgrp-head">Payment methods</div>
-    <div id="pm-list"><div style="padding:10px 14px;font-size:11px;color:var(--mu)">No payment methods yet.</div></div>
-    <div class="srow clickable" onclick="openAddPM()"><div><div class="srow-lbl" style="color:var(--blue)">+ Add payment method</div></div></div>
+    <div class="sgrp-head">Payment method</div>
+
+    <div style="padding:12px 14px;font-size:11px;color:var(--mu)">
+      Payments are processed via PayPal only
+    </div>
+
+    <div class="srow clickable" onclick="openConnectAccount('paypal')">
+      <div>
+        <div class="srow-lbl">PayPal email</div>
+        <div class="srow-sub" id="prof-acct-paypal">Not connected</div>
+      </div>
+      <span class="chevron">›</span>
+    </div>
   </div>
+
+  <!-- EDIT PROFILE -->
   <div class="sgrp">
     <div class="sgrp-head">Edit profile</div>
-    <div class="srow"><div><div class="srow-lbl">Display name</div></div><input class="sinp" id="prof-nm-inp" placeholder="Your name"/></div>
-    <div class="srow"><div><div class="srow-lbl">Username</div></div><input class="sinp" id="prof-us-inp" placeholder="@username"/></div>
-    <div class="srow"><div><div class="srow-lbl">Country</div></div><input class="sinp" id="prof-co-inp" placeholder="e.g. Kenya"/></div>
-  </div>
-  <div id="prof-msg"></div>
-  <button class="save-btn" onclick="saveProfile()">Save profile</button>
 
-  <!-- WITHDRAW SECTION IN PROFILE (disabled) -->
-  <div class="sgrp" style="margin-top:20px;opacity:0.55;pointer-events:none">
-    <div class="sgrp-head" style="display:flex;align-items:center;gap:8px">Withdrawal
-      <span style="font-size:9px;background:#FED7D7;color:#9B2C2C;padding:2px 7px;border-radius:10px;font-weight:700">COMING SOON</span>
+    <div class="srow">
+      <div class="srow-lbl">Display name</div>
+      <input class="sinp" id="prof-nm-inp" placeholder="Your name"/>
     </div>
-    <div style="padding:10px 14px;font-size:12px;color:var(--mu)">
-      <div style="font-size:10px;color:var(--mu);margin-bottom:4px">Available balance</div>
-      <div style="font-size:20px;font-weight:900;color:var(--green);margin-bottom:8px" id="prof-bal">$0.0000</div>
-      <div style="font-size:11px;color:var(--mu);margin-bottom:10px">Withdrawals are temporarily disabled. Connect your accounts below to be ready when payouts launch.</div>
+
+    <div class="srow">
+      <div class="srow-lbl">Username</div>
+      <input class="sinp" id="prof-us-inp" placeholder="@username"/>
     </div>
-    <!-- Method cards (display only, disabled) -->
-    <div style="padding:0 14px 14px">
-      <div class="wmet sel" style="cursor:default;margin-bottom:7px" data-method="mpesa"><div class="wmet-ico" style="background:#E8F5E9">📱</div><div style="flex:1"><div class="wmet-name">M-Pesa</div><div class="wmet-linked" id="prof-wlink-mpesa" style="font-size:10px;color:#00a651;font-weight:600;margin-top:2px">Not connected</div></div><div class="wmet-min">Min $1 +2%</div></div>
-      <div class="wmet" style="cursor:default;margin-bottom:7px" data-method="paypal"><div class="wmet-ico" style="background:#E3F2FD">🅿️</div><div style="flex:1"><div class="wmet-name">PayPal</div><div class="wmet-linked" id="prof-wlink-paypal" style="font-size:10px;color:#003087;font-weight:600;margin-top:2px">Not connected</div></div><div class="wmet-min">Min $3 +2%</div></div>
-      <div class="wmet" style="cursor:default;margin-bottom:7px" data-method="airtm"><div class="wmet-ico" style="background:#FFF3E0">💱</div><div style="flex:1"><div class="wmet-name">Airtm</div><div class="wmet-linked" id="prof-wlink-airtm" style="font-size:10px;color:#0050c8;font-weight:600;margin-top:2px">Not connected</div></div><div class="wmet-min">Min $3 +2%</div></div>
-      <div class="wmet" style="cursor:default" data-method="payoneer"><div class="wmet-ico" style="background:#F3E5F5">🏦</div><div style="flex:1"><div class="wmet-name">Payoneer</div><div class="wmet-linked" id="prof-wlink-payoneer" style="font-size:10px;color:#FF4800;font-weight:600;margin-top:2px">Not connected</div></div><div class="wmet-min">Min $20 +2%</div></div>
+
+    <div class="srow">
+      <div class="srow-lbl">Country</div>
+      <input class="sinp" id="prof-co-inp" placeholder="e.g. Kenya"/>
     </div>
   </div>
-  <!-- Manage payment accounts (enabled) -->
-  <div class="sgrp" style="margin-top:0">
-    <div class="sgrp-head">Payment accounts</div>
-    <div style="padding:0 14px 14px;font-size:11px;color:var(--mu)">Connect your accounts now. Withdrawals launch soon.</div>
-    <div class="srow clickable" onclick="openConnectAccount('mpesa')"><div><div class="srow-lbl">M-Pesa number</div><div class="srow-sub" id="prof-acct-mpesa">Not connected</div></div><span class="chevron">›</span></div>
-    <div class="srow clickable" onclick="openConnectAccount('paypal')"><div><div class="srow-lbl">PayPal email</div><div class="srow-sub" id="prof-acct-paypal">Not connected</div></div><span class="chevron">›</span></div>
-    <div class="srow clickable" onclick="openConnectAccount('airtm')"><div><div class="srow-lbl">Airtm username</div><div class="srow-sub" id="prof-acct-airtm">Not connected</div></div><span class="chevron">›</span></div>
-    <div class="srow clickable" onclick="openConnectAccount('payoneer')"><div><div class="srow-lbl">Payoneer email</div><div class="srow-sub" id="prof-acct-payoneer">Not connected</div></div><span class="chevron">›</span></div>
-  </div>
+
+  <!-- MESSAGE -->
+  <div id="prof-msg"></div>
+
+  <!-- SAVE -->
+  <button class="save-btn" onclick="saveProfile()">
+    Save Profile
+  </button>
+
 </div>
 
 <!-- SETTINGS PAGE -->
@@ -1234,22 +1267,43 @@ body {
   </div>
 </div>
 
-<!-- ADD PAYMENT METHOD MODAL -->
+<!-- ADD PAYPAL MODAL -->
 <div class="mwrap" id="pm-modal">
   <div class="modal">
-    <div class="mt">Add payment method</div>
-    <div class="ms">Add a wallet for faster withdrawals</div>
+
+    <div class="mt">Add PayPal</div>
+    <div class="ms">Enter your PayPal email to receive payments</div>
+
+    <!-- METHOD -->
     <span class="mfield-lbl">Method</span>
-    <select class="msel" id="pm-type">
-      <option value="USDT TRC-20">USDT (TRC-20)</option>
-      <option value="Bitcoin BTC">Bitcoin (BTC)</option>
-      <option value="USDT ERC-20">USDT (ERC-20)</option>
-      <option value="TON">TON</option>
-    </select>
-    <span class="mfield-lbl">Label</span><input class="minp" id="pm-label" placeholder="e.g. My main wallet"/>
-    <span class="mfield-lbl">Wallet address</span><input class="minp" id="pm-addr-input" placeholder="Your wallet address"/>
-    <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mu);cursor:pointer;margin-top:8px"><input type="checkbox" id="pm-def"/> Set as default</label>
-    <div class="mbtns"><button class="mcan" onclick="closeModal('pm-modal')">Cancel</button><button class="msub" onclick="savePM()">Save</button></div>
+    <div class="minp" style="background:#E3F2FD;color:#0A66C2;font-weight:700">
+      PayPal
+    </div>
+
+    <!-- EMAIL -->
+    <span class="mfield-lbl">PayPal Email</span>
+    <input class="minp"
+           id="pm-email"
+           type="email"
+           placeholder="Enter your PayPal email" />
+
+    <!-- INFO -->
+    <div style="font-size:11px;color:var(--mu);margin-top:6px">
+      ⚠️ Email must match your account email
+    </div>
+
+    <!-- DEFAULT -->
+    <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mu);cursor:pointer;margin-top:10px">
+      <input type="checkbox" id="pm-def" checked/>
+      Set as default
+    </label>
+
+    <!-- BUTTONS -->
+    <div class="mbtns">
+      <button class="mcan" onclick="closeModal('pm-modal')">Cancel</button>
+      <button class="msub" onclick="savePayPal()">Save</button>
+    </div>
+
   </div>
 </div>
 
